@@ -1,0 +1,27 @@
+resources:
+  - name: code
+    type: git
+    source:
+      uri: https://github.com/sharadg/dotnet-framework-docker-samples
+      branch: master
+jobs:
+  - name: build
+    plan:
+    - get: code
+      trigger: true
+    - task: compile and cf push
+      config:
+        platform: windows
+        inputs:
+          - name: code
+        run:
+          path: powershell
+          args:
+            - |
+              cd code/aspnetapp
+              nuget restore
+              & 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MsBuild.exe' /t:ReBuild
+              cf login -u admin -p w2z-X3_tSEn3EJ8a0F2zuZ2NVizky7tO -o westeros -s iron_throne --skip-ssl-validation -a https://api.sys.home.pcfdot.com
+              cd aspnetapp
+              cf push dotnetapp -b hwc_buildpack -s windows
+
